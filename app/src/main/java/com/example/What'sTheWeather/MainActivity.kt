@@ -1,13 +1,4 @@
 package com.example.testapp3
-
-/*
-import kotlinx.android.synthetic.main.activity_main.*
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
- */
-
-//import java.net.http.HttpRequest
-//import java.net.http.HttpResponse
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Gravity
@@ -21,75 +12,57 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-//import okhttp3.OkHttpClient
-//import okhttp3.Request
-//import java.io.IOException
-////import okhttp3.MediaType.Companion.toMediaType
-////import okhttp3.RequestBody.Companion.toRequestBody
-//import com.squareup.okhttp.OkHttpClient;
-
-
-
+/*
+File: MainActivity.kt
+Author: Ishaan Ghosh & Aleks Dimitrov
+Purpose: This is the logic behind the weather app. We have overriden the onCreate function to
+         create the screen (activity) then call an async function to retrieve weather data through
+         an API call, and format the data to appear on screen. The async weather API call is done
+         using the Android AsyncTask structure (onPreExecute, etc..).
+*/
 class MainActivity : AppCompatActivity() {
-    var city = "tucson,us"//  "dhaka,bd"
+    // Declaring default variables used in API call and data formatting
+    var city = "tucson,us"
     val API: String = "f5979ed4f3b30e4e3dcc9c934eaeaa9f"
-
     var units = "imperial"
     var deg = "°F"
     var wind_units = "mph"
 
-
+    /*
+        This is where we initialize our activity (main app screen). We use it to set the
+        base layout of the app using setContentView. WE then execute our async function
+        to produce default results for our weather app. We also use this function to
+        implement the code behind our city search and degree-switching buttons.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Set display to main layout
         setContentView(R.layout.activity_main)
-
-//        doesn't affect start background for mobile device
+        // Default is light mode
         themeSwitch.isChecked = false
-
+        // Call API and format results for screen
         weatherTask().execute()
 
-//        // VisualCrossing (Kotlin, rapidapi.com):
-//        val client = OkHttpClient()
-//
-//        val request = Request.Builder()
-//            .url("https://visual-crossing-weather.p.rapidapi.com/forecast?aggregateHours=24&location=Washington%2CDC%2CUSA&contentType=csv&unitGroup=us&shortColumnNames=0")
-//            .get()
-//            .addHeader("x-rapidapi-host", "visual-crossing-weather.p.rapidapi.com")
-//            .addHeader("x-rapidapi-key", "SIGN-UP-FOR-KEY")
-//            .build()
-//
-//        val response = client.newCall(request).execute()
-//
-//        // VisualCrossing (from Java):
-//        val request: java.net.http.HttpRequest = java.net.http.HttpRequest.newBuilder()
-//            .uri(URI.create("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/tucson?unitGroup=metric&key=6DSK2NXVH9XAPD9KEBGFK36K6&contentType=json"))
-//            .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody()).build()
-//        val response: java.net.http.HttpResponse = HttpClient.newHttpClient()
-//            .send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
-//        println(response.body())
-
         // Special feature - Polymorphism: converts a TextView to a Button
-        val btn_click_me = findViewById<TextView>(R.id.goSearchBut) // as Button // (Button) //findViewById(R.id.changeDegBtn) as Button
-        // set on-click listener
+        // This is where the onclick logic for our search button goes.
+        // It works by taking the string in the text view next to it and
+        // doing an API call on the new string.
+        val btn_click_me = findViewById<TextView>(R.id.goSearchBut)
         btn_click_me.setOnClickListener (object:View.OnClickListener {
             override fun onClick(p0: View?) {
-//                TODO("Not yet implemented")
-                // your code to perform when the user clicks on the button
-//                Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
+                // Set city var to new city string and recall API
                 city = findViewById<TextView>(R.id.cityString).text.toString()
                 weatherTask().execute()
             }
         })
 
-        val changeDegBtn = findViewById<TextView>(R.id.changeDegBtn) // as Button // (Button) //findViewById(R.id.changeDegBtn) as Button
-        // set on-click listener
+        // Special feature: Higher order function
+        // This is where the onclick logic for our change degree button goes.
+        // It works by conditionals, checking if the units are one way and
+        // changing it to the other and vica versa.
+        val changeDegBtn = findViewById<TextView>(R.id.changeDegBtn)
         changeDegBtn.setOnClickListener (object:View.OnClickListener {
             override fun onClick(p0: View?) {
-//                TODO("Not yet implemented")
-                // your code to perform when the user clicks on the button
-//                Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
-//                city = findViewById<TextView>(R.id.cityString).text.toString()
                 if (units == "metric") {
                     units = "imperial"
                     deg = "°F"
@@ -99,14 +72,13 @@ class MainActivity : AppCompatActivity() {
                     deg = "°C"
                     wind_units = "m/s"
                 }
-
                 weatherTask().execute()
             }
         })
 
         // Declare the switch from the layout file
         val themeSwitch = findViewById<Switch>(R.id.themeSwitch)
-
+        // Special feature: Lambda Function
         // set the switch to listen on checked change
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
 
@@ -115,99 +87,75 @@ class MainActivity : AppCompatActivity() {
             // else keep the switch text to enable dark mode
             if (themeSwitch.isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//                themeSwitch.text = "Disable dark mode"
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//                themeSwitch.text = "Enable dark mode"
             }
         }
 
 
     }
 
-
-
+    // Special Feature: Asynchronous Tasks
+    /*
+        This inner class is our apps AsyncTask. It contains all the code for making an
+        API call, parsing the recieving information and displaying it on the screen.
+        It does this through the basic AsyncTask structure (onPreExecute, doInBackground onPostExecute).
+    */
     inner class weatherTask() : AsyncTask<String, Void, String>() {
+        /*
+            This function is invoked in UI thread before the AsyncTask is executed. We use it to show the
+            loading bar while the app is loading the weather results from the API. It is generally used
+            for UI changes before the AsyncTask.
+        */
         override fun onPreExecute() {
             super.onPreExecute()
-            /* Showing the ProgressBar, Making the main design GONE */
+            // Show the loader and hide the main application and error text
             findViewById<ProgressBar>(R.id.loader).visibility = View.VISIBLE
             findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.GONE
             findViewById<TextView>(R.id.errorText).visibility = View.GONE
         }
+        /*
+            This function does all the background execution in an AsyncTask. For our program we utilize
+            it to do the API call and return the results, or null if there is an exception.
 
+            Return The JSON file containing the weather information
+        */
         override fun doInBackground(vararg params: String?): String? {
-//            val units = "imperial"
             var response:String?
             try{
-                // Current
+                // This is the API call, uses city and units as variables to allow for user customization
                 response = URL("https://api.openweathermap.org/data/2.5/weather?q="+city+"&units="+units+"&appid=$API").readText(
                     Charsets.UTF_8
                 )
-
-                // 16-day
-//                response = URL("https://api.openweathermap.org/data/2.5/forecast/daily?q=London&units=metric&cnt=7&appid=$API").readText(
-//                    Charsets.UTF_8
-//                )
-
-                // 5-day
-//                response = URL("http://api.openweathermap.org/data/2.5/forecast?id=524901&lang=en&appid=$API").readText(
-//                    Charsets.UTF_8
-//                )
-
             }catch (e: Exception){
                 response = null
             }
             return response
         }
 
+        /*
+            This function gets triggered after doInBackground is over. The values returned from the doInBackground
+            are received here. We then take that JSON file and parse it, so we can apply key information to the
+            right elements in the application.
+
+            Parameters result The JSON string result from the doInBack API call
+        */
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             try {
-                /* Extracting JSON returns from the API */
+                // Retrieve all important information from JSON file using ID's
                 val jsonObj = JSONObject(result)
                 val main = jsonObj.getJSONObject("main")
                 val sys = jsonObj.getJSONObject("sys")
                 val wind = jsonObj.getJSONObject("wind")
                 val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
-
-//                val list_main = jsonObj.getJSONArray("list").getJSONObject(1)
-//                val sea_level = list_main.getString("sea_level")
-//
-//                val sea_level = jsonObj.getJSONObject("main").getString("sea_level")
-
-//                val minutely = jsonObj.getJSONArray("minutely").getJSONObject(0)
-//                val precip = minutely.getString("precipitation")
                 val clouds = jsonObj.getJSONObject("clouds")
-
-
-
                 val updatedAt:Long = jsonObj.getLong("dt")
                 val updatedAtText = "Updated at: "+ SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH).format(
                     Date(updatedAt*1000)
                 )
-//                val label = "°F"
-
-
-
                 val temp = main.getString("temp")+deg
                 val feels_like = main.getString("feels_like")+deg
-//                val minTemp = "Min Temp: " + main.getString("temp_min")+deg
-//                val maxTemp = "Max Temp: " + main.getString("temp_max")+deg
-
-                // () version:
-//                val minTemp = "Min Temp \n" + "       " + main.getString("temp_min")+deg
-//                val maxTemp = "Max Temp\n" + "        " + main.getString("temp_max")+deg
-//                val pressure = "Pressure\n" + "       " + main.getString("pressure")+" hPa"
-//                val humidity = "Humidity\n" + "       " + main.getString("humidity")+"%"
-//                val sunrise:Long = sys.getLong("sunrise")
-//                val sunset:Long = sys.getLong("sunset")
-//                val windSpeed = "Wind (" + wind_units + ")\n" + "       " + wind.getString("speed")+" "+wind_units
-//                val all = "Clouds\n" + "       " + clouds.getString("all")+"%"
-//                val weatherDescription = weather.getString("description")
-//                val address = jsonObj.getString("name")+", "+sys.getString("country")
-
-                // units version:
                 val minTemp = main.getString("temp_min")+deg
                 val maxTemp = main.getString("temp_max")+deg
                 val pressure = main.getString("pressure")+" hPa"
@@ -219,10 +167,7 @@ class MainActivity : AppCompatActivity() {
                 val weatherDescription = weather.getString("description")
                 val address = jsonObj.getString("name")+", "+sys.getString("country")
 
-                /* Populating extracted data into our views */
-
-                // visibility?
-
+                // Find view's on application page and edit respective views to show correct weather info
                 findViewById<TextView>(R.id.address).text = address
                 findViewById<TextView>(R.id.updated_at).text =  updatedAtText
                 findViewById<TextView>(R.id.status).text = weatherDescription.capitalize()
@@ -247,14 +192,9 @@ class MainActivity : AppCompatActivity() {
                 findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.VISIBLE
 
             } catch (e: Exception) {
+                // If there was an exception, something probably went wrong with the city name.
                 Toast.makeText(this@MainActivity, "Invalid city, please retry", Toast.LENGTH_SHORT).show()
-//                toast.setGravity(Gravity.TOP or Gravity.LEFT, 0, 0)
-//                Gravity.CENTER_VERTICAL
-//                Gravity.TOP
-
-//                findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
-//                findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
-//                Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
+                // Reset to default and rerun AsyncTask
                 city = "Tucson"
                 weatherTask().execute()
             }
