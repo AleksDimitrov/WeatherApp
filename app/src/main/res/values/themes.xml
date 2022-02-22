@@ -1,7 +1,27 @@
+<!--works-->
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme. -->
+<!--    <style name="Theme.TestApp3" parent="Theme.MaterialComponents.DayNight.NoActionBar">-->
+<!--&lt;!&ndash;        <item name="android:background">@drawable/gradient_bg</item>&ndash;&gt;-->
+<!--        <item name="colorPrimary">@color/purple_500</item>-->
+
+<!--    </style>-->
+
+<!--    works-->
     <style name="Theme.TestApp3" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
+
+<!--    crashes-->
+<!--<resources xmlns:android="http://schemas.android.com/apk/res/android">-->
+<!--    <style name="Theme.TestApp3" parent="@android:style/Theme.Light">-->
+<!--    <style name="Theme.TestApp3" parent="@android:style/Theme.Light">-->
+
+        <item name="android:background">@drawable/gradient_bg</item>
+
+<!--    does nothing-->
+        <item name="textFillColor" id="goSearchBut">@color/teal_200</item>
+        <item name="buttonStyle">@color/white</item>
+
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -10,7 +30,20 @@
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+<!--        works for og code-->
+<!--        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>-->
+
         <!-- Customize your theme here. -->
+        <!-- Primary brand color. -->
+<!--        <shape xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--            android:shape="rectangle">-->
+<!--            <gradient-->
+<!--                android:angle="90"-->
+<!--                android:startColor="#00FFFFFF"-->
+<!--                android:endColor="#00FFFFFF"-->
+<!--                android:type="linear"/>-->
+<!--            &lt;!&ndash;        9561a1, 122259; 00FFFFFF &ndash;&gt;-->
+<!--        </shape>-->
     </style>
+
 </resources>

@@ -6,19 +6,21 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
  */
 
-import android.os.AsyncTask
-import android.os.Bundle
-import android.view.View
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import org.json.JSONObject
-import java.net.URL
 //import java.net.http.HttpRequest
 //import java.net.http.HttpResponse
+import android.os.AsyncTask
+import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONObject
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 //import okhttp3.OkHttpClient
 //import okhttp3.Request
@@ -41,6 +43,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+//        doesn't affect start background for mobile device
+        themeSwitch.isChecked = false
 
         weatherTask().execute()
 
@@ -98,6 +103,26 @@ class MainActivity : AppCompatActivity() {
                 weatherTask().execute()
             }
         })
+
+        // Declare the switch from the layout file
+        val themeSwitch = findViewById<Switch>(R.id.themeSwitch)
+
+        // set the switch to listen on checked change
+        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+
+            // if the button is checked, i.e., towards the right or enabled
+            // enable dark mode, change the text to disable dark mode
+            // else keep the switch text to enable dark mode
+            if (themeSwitch.isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//                themeSwitch.text = "Disable dark mode"
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//                themeSwitch.text = "Enable dark mode"
+            }
+        }
+
+
     }
 
 
@@ -222,8 +247,16 @@ class MainActivity : AppCompatActivity() {
                 findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.VISIBLE
 
             } catch (e: Exception) {
-                findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
-                findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
+                Toast.makeText(this@MainActivity, "Invalid city, please retry", Toast.LENGTH_SHORT).show()
+//                toast.setGravity(Gravity.TOP or Gravity.LEFT, 0, 0)
+//                Gravity.CENTER_VERTICAL
+//                Gravity.TOP
+
+//                findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
+//                findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
+//                Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
+                city = "Tucson"
+                weatherTask().execute()
             }
 
         }
